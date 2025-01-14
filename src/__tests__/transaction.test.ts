@@ -5,12 +5,14 @@ import { logger } from '../utils/logger';
 import CryptoJS from 'crypto-js';
 import { MochimoHasher, WOTSWallet, WotsAddress } from 'mochimo-wots-v2';
 
+const apiURL = process.env.API_URL || 'http://46.250.241.212:8081'
+
 describe('TransactionBuilder Integration', () => {
   let builder: TransactionBuilder;
 
   beforeAll(() => {
     logger.enableDebug();
-    builder = new TransactionBuilder('http://46.250.241.212:8081');
+    builder = new TransactionBuilder(apiURL);
   });
 
   it.only('should build and submit a transaction', async () => {
