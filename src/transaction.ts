@@ -1,4 +1,4 @@
-import { MochimoConstruction } from './construction';
+import { MochimoConstruction } from './api';
 import { MCM_CURRENCY, NETWORK_IDENTIFIER } from './types';
 import { logger } from './utils/logger';
 import { WOTSWallet, MochimoHasher } from 'mochimo-wots';
@@ -249,12 +249,6 @@ export class TransactionBuilder {
     // Get pub and rnd from wallet
     const pub = sourceWallet.getWots()!.slice(2144, 2144 + 32);
     const rnd = sourceWallet.getWots()!.slice(2144 + 32, 2144 + 32 + 32);
-    
-    // Create untagged rnd
-    const untaggedrnd = new Uint8Array([
-      ...rnd.slice(0, 32-12), 
-      ...new Uint8Array(Buffer.from("420000000e00000001000000", 'hex'))
-    ]);
     
     // Combine signature components
     const combinedSig = new Uint8Array([

@@ -11,7 +11,7 @@ export interface Currency {
 
 export const MCM_CURRENCY: Currency = {
   symbol: "MCM",
-  decimals: 0
+  decimals: 9
 };
 
 export const NETWORK_IDENTIFIER: NetworkIdentifier = {
@@ -65,4 +65,55 @@ export interface MempoolTransactionResponse {
     metadata?: Record<string, any>;
   };
   metadata?: Record<string, any>;
+}
+export interface BalanceResponse {
+  balances: {
+    currency: {
+      decimals: number;
+      symbol: string;
+    };
+    value: string;
+  }[];
+  block_identifier: {
+    hash: string;
+    index: number;
+  };
+}
+
+export interface RequiredPublicKey {
+  address: string;
+}
+
+export interface PreprocessOptions {
+  block_to_live: number;
+  change_pk: string;
+  source_addr: string;
+}
+
+export interface PreprocessResponse {
+  options: PreprocessOptions;
+  required_public_keys: RequiredPublicKey[];
+}
+
+export interface MetadataResponse {
+  metadata: {
+    block_to_live: number;
+    change_pk: string;
+    source_balance: number;
+  };
+  suggested_fee: {
+    value: string;
+    currency: Currency;
+  }[];
+}
+
+export interface SigningPayload {
+  account_identifier: AccountIdentifier;
+  hex_bytes: string;
+  signature_type: string;
+}
+
+export interface PayloadsResponse {
+  unsigned_transaction: string;
+  payloads: SigningPayload[];
 }

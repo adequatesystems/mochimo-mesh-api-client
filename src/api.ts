@@ -1,4 +1,4 @@
-import { NetworkIdentifier, MCM_CURRENCY, NETWORK_IDENTIFIER, Operation, PublicKey, ResolveTagResponse, TransactionIdentifier, MempoolResponse, MempoolTransactionResponse } from './types';
+import { NetworkIdentifier, MCM_CURRENCY, NETWORK_IDENTIFIER, Operation, PublicKey, ResolveTagResponse, TransactionIdentifier, MempoolResponse, MempoolTransactionResponse, BalanceResponse, PreprocessResponse, MetadataResponse, PreprocessOptions, PayloadsResponse } from './types';
 import { logger } from './utils/logger';
 
 interface RosettaError {
@@ -6,6 +6,8 @@ interface RosettaError {
   message: string;
   retriable: boolean;
 }
+
+
 
 export class MochimoConstruction {
   public baseUrl: string;
@@ -83,7 +85,7 @@ export class MochimoConstruction {
     });
   }
 
-  async preprocess(operations: Operation[], metadata: any) {
+  async preprocess(operations: Operation[], metadata: any): Promise<PreprocessResponse> {
     logger.debug('Preprocessing transaction', { operations, metadata });
     return this.makeRequest('/construction/preprocess', {
       network_identifier: this.networkIdentifier,
@@ -92,7 +94,7 @@ export class MochimoConstruction {
     });
   }
 
-  async metadata(options: any, publicKeys: PublicKey[]) {
+  async metadata(options: PreprocessOptions, publicKeys: PublicKey[]): Promise<MetadataResponse> {
     logger.debug('Fetching metadata', { options, publicKeys });
     return this.makeRequest('/construction/metadata', {
       network_identifier: this.networkIdentifier,
@@ -101,7 +103,11 @@ export class MochimoConstruction {
     });
   }
 
-  async payloads(operations: Operation[], metadata: any, publicKeys: PublicKey[]) {
+  async payloads(
+    operations: Operation[], 
+    metadata: any, 
+    publicKeys: PublicKey[]
+  ): Promise<PayloadsResponse> {
     logger.debug('Fetching payloads', { operations, metadata, publicKeys });
     return this.makeRequest('/construction/payloads', {
       network_identifier: this.networkIdentifier,
@@ -142,6 +148,13 @@ export class MochimoConstruction {
         tag: tag
       },
       method: "tag_resolve"
+    });
+  }
+  
+  async getAccountBalance(address: string): Promise<BalanceResponse> {
+    return this.makeRequest('/account/balance', {
+      network_identifier: this.networkIdentifier,
+      account_identifier: { address }
     });
   }
 
