@@ -50,10 +50,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wagleanuj/mochimo-api-client.git"
+    "url": "git+https://github.com/wagleanuj/mochimo-mesh-api-client.git"
   },
   "bugs": {
-    "url": "https://github.com/wagleanuj/mochimo-api-client/issues"
+    "url": "https://github.com/wagleanuj/mochimo-mesh-api-client/issues"
   },
-  "homepage": "https://github.com/wagleanuj/mochimo-api-client#readme"
+  "homepage": "https://github.com/wagleanuj/mochimo-mesh-api-client#readme"
 }
