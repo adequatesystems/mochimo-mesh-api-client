@@ -1,6 +1,6 @@
 {
   "name": "mochimo-mesh-api-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript client library for interacting with the Mochimo blockchain API",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
