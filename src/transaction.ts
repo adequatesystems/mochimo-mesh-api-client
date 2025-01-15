@@ -20,26 +20,26 @@ export class TransactionBuilder {
     blockToLive: number;
   }): Buffer {
     // Remove '0x' prefix if present
-    const sourceAddr = params.sourceAddress.startsWith('0x') ? 
+    const sourceAddr = params.sourceAddress.startsWith('0x') ?
       params.sourceAddress.slice(2) : params.sourceAddress;
-    const destAddr = params.destinationTag.startsWith('0x') ? 
+    const destAddr = params.destinationTag.startsWith('0x') ?
       params.destinationTag.slice(2) : params.destinationTag;
-    const changePk = params.changePk.startsWith('0x') ? 
+    const changePk = params.changePk.startsWith('0x') ?
       params.changePk.slice(2) : params.changePk;
 
     // Create buffer for transaction
     const txBuffer = Buffer.alloc(2304); // Standard Mochimo transaction size
-    
+
     // Write header values
     txBuffer.writeUInt32LE(0, 0); // version
     Buffer.from(sourceAddr, 'hex').copy(txBuffer, 4); // source address
     Buffer.from(changePk, 'hex').copy(txBuffer, 44); // change address
     Buffer.from(destAddr, 'hex').copy(txBuffer, 84); // destination address
-    
+
     // Write amounts
     txBuffer.writeBigUInt64LE(params.amount, 124);
     txBuffer.writeBigUInt64LE(params.fee, 132);
-    
+
     // Write block to live
     txBuffer.writeUInt32LE(params.blockToLive, 140);
 
@@ -128,14 +128,14 @@ export class TransactionBuilder {
       );
       logger.debug('Metadata response', metadataResponse);
       // this.construction.baseUrl = 'http://localhost:8081'
-      const results =  await this.construction.payloads(
+      const results = await this.construction.payloads(
         operations,
         metadataResponse.metadata,
-        [{ hex_bytes:  params.publicKey, curve_type: 'wotsp' }]
+        [{ hex_bytes: params.publicKey, curve_type: 'wotsp' }]
       );
       // this.construction.baseUrl = 'http://46.250.241.212:8081'
       return results;
-      
+
     } catch (error) {
       logger.error('Error building transaction', error);
       throw error instanceof Error ? error : new Error('Unknown error occurred');
@@ -147,20 +147,21 @@ export class TransactionBuilder {
     return await this.construction.submit(signedTransaction);
   }
 
-  public createSignature(publicKey: string, unsignedTx: string, signatureBytes: Uint8Array) {
+  public createSignature(publicKey: Uint8Array, unsignedTx: string, signatureBytes: Uint8Array) {
+    //get all the components of the public key
     return {
-        signing_payload: {
-            hex_bytes: unsignedTx,
-            signature_type: "wotsp"
-        },
-        public_key: {
-            hex_bytes: publicKey,
-            curve_type: "wotsp"
-        },
-        signature_type: "wotsp",
-        hex_bytes: Buffer.from(signatureBytes).toString('hex')
+      signing_payload: {
+        hex_bytes: unsignedTx,
+        signature_type: "wotsp"
+      },
+      public_key: {
+        hex_bytes: Buffer.from(publicKey).toString('hex'),
+        curve_type: "wotsp"
+      },
+      signature_type: "wotsp",
+      hex_bytes: Buffer.from(signatureBytes).toString('hex')
     };
-}
+  }
 
   /**
    * Submit a transaction and wait for it to appear in the mempool
@@ -168,7 +169,7 @@ export class TransactionBuilder {
    * @param timeout - Maximum time to wait for mempool appearance
    */
   async submitAndMonitor(
-    signedTransaction: string, 
+    signedTransaction: string,
     timeout: number = 60000
   ) {
     const submitResult = await this.submitSignedTransaction(signedTransaction);

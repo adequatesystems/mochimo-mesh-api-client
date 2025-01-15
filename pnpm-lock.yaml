@@ -11,13 +11,16 @@ importers:
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
-      mochimo-wots-v2:
-        specifier: ^1.0.6
-        version: 1.0.6
+      mochimo-wots:
+        specifier: 1.2.4
+        version: 1.2.4
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -317,6 +320,9 @@ packages:
 
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
+
+  '@types/crypto-js@4.2.2':
+    resolution: {integrity: sha512-sDOLlVbHhXpAUAL0YHDUUwDZf3iN4Bwi4W6a0W0b+QcAezUbRtH4FVb+9J4h+XFPW7l/gQ9F8qC7P+Ec4k8QVQ==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -901,8 +907,8 @@ packages:
     resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==}
     engines: {node: '>=10'}
 
-  mochimo-wots-v2@1.0.6:
-    resolution: {integrity: sha512-NcV/Occva0sb/UmnOmQmgMXf5br2LHPl3kGkMmV1eY5A86COBQWExQWnjcPNiGCrKSiyzaLitUjlrTjY9Nu0Aw==}
+  mochimo-wots@1.2.4:
+    resolution: {integrity: sha512-iwZ2sNz1miSBO2ak77UZKS/GN0ctWIXYgCTvvhShTx3+cy0+Ig/WGF7q5A6BcEN4gDU7iyM7atUauFe14Xlpng==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -1607,6 +1613,8 @@ snapshots:
   '@types/babel__traverse@7.20.6':
     dependencies:
       '@babel/types': 7.26.5
+
+  '@types/crypto-js@4.2.2': {}
 
   '@types/graceful-fs@4.1.9':
     dependencies:
@@ -2364,7 +2372,7 @@ snapshots:
     dependencies:
       brace-expansion: 2.0.1
 
-  mochimo-wots-v2@1.0.6:
+  mochimo-wots@1.2.4:
     dependencies:
       '@noble/hashes': 1.7.0
 

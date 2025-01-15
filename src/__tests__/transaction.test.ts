@@ -3,7 +3,7 @@ import { TransactionBuilder } from '../transaction';
 import { describe, expect, it, beforeAll } from '@jest/globals';
 import { logger } from '../utils/logger';
 import CryptoJS from 'crypto-js';
-import { MochimoHasher, WOTSWallet, WotsAddress } from 'mochimo-wots-v2';
+import { MochimoHasher, WOTSWallet } from 'mochimo-wots';
 
 const apiURL = process.env.API_URL || 'http://46.250.241.212:8081'
 
@@ -20,56 +20,57 @@ describe('TransactionBuilder Integration', () => {
 
       const firstWotsSeed = CryptoJS.SHA256('mysourceseeddds' + 2).toString();
 
-      const sourceWotsSeed = CryptoJS.SHA256('mysourceseeddds' + 4).toString();
-      const changeWotsSeed = CryptoJS.SHA256('mysourceseeddds' + 5).toString();
+      const sourceWotsSeed = CryptoJS.SHA256('mysourceseeddds' + 6).toString();
+      const changeWotsSeed = CryptoJS.SHA256('mysourceseeddds' + 7).toString();
       const destWotsSeed = CryptoJS.SHA256('mydestseeddds').toString();
 
 
-      const firstWotsWallet = WOTSWallet.create('first', Buffer.from(firstWotsSeed, 'hex'), Buffer.from('125989d23edfb582db3e730b', 'hex'));
-      const firstAddress = WotsAddress.addrFromWots(firstWotsWallet.address!.slice(0, 2144));
-      const sourceTag = firstAddress?.slice(0, 20);
+      const firstWotsWallet = WOTSWallet.create('first', Buffer.from(firstWotsSeed, 'hex'), undefined);
+      console.log("firstWotsWallet", firstWotsWallet.toJSON())
+      // const firstAddress = WotsAddress.addrFromWots(firstWotsWallet.address!.slice(0, 2144));
+      // const sourceTag = firstAddress?.slice(0, 20);
 
-      const sourceWotsWallet = WOTSWallet.create('source', Buffer.from(sourceWotsSeed, 'hex'), Buffer.from('125989d23edfb582db3e730b', 'hex'));
-      const changeWotsWallet = WOTSWallet.create('change', Buffer.from(changeWotsSeed, 'hex'), Buffer.from('125989d23edfb582db3e730b', 'hex'));
+      const sourceWotsWallet = WOTSWallet.create('source', Buffer.from(sourceWotsSeed, 'hex'), firstWotsWallet.getAddrHash()!);
+      const changeWotsWallet = WOTSWallet.create('change', Buffer.from(changeWotsSeed, 'hex'), firstWotsWallet.getAddrHash()!);
 
-      const destWallet = WOTSWallet.create('dest', Buffer.from(destWotsSeed, 'hex'), Buffer.from('125dfa821c48b8b1ff6802ca', 'hex'));
-      const destAddress = WotsAddress.addrFromWots(destWallet.address!.slice(0, 2144));
-      const destTag = destAddress?.slice(0, 20);
+      const destWallet = WOTSWallet.create('dest', Buffer.from(destWotsSeed, 'hex'), undefined);
+
+      const resolveTag = await builder.construction.resolveTag("0x"+Buffer.from(sourceWotsWallet.getAddrTag()!).toString('hex'))
+      console.log("resolveTag", resolveTag)
+      // const destAddress = WotsAddress.addrFromWots(destWallet.address!.slice(0, 2144));
+      // const destTag = destAddress?.slice(0, 20);
 
       //new stuff for v3
-      const sourceWotsAddress = WotsAddress.addrFromWots(sourceWotsWallet.address!.slice(0, 2144));
-      const changeWotsAddress = WotsAddress.addrFromWots(changeWotsWallet.address!.slice(0, 2144));
+      // const sourceWotsAddress = WotsAddress.addrFromWots(sourceWotsWallet.address!.slice(0, 2144));
+      // const changeWotsAddress = WotsAddress.addrFromWots(changeWotsWallet.address!.slice(0, 2144));
 
       //tag the addresses
-      const taggedSourceWotsAddress = new Uint8Array([...sourceTag!, ...sourceWotsAddress!.slice(20, 40)]);
-      const taggedChangeWotsAddress = new Uint8Array([...sourceTag!, ...changeWotsAddress!.slice(20, 40)]);
+      // const taggedSourceWotsAddress = new Uint8Array([...sourceTag!, ...sourceWotsAddress!.slice(20, 40)]);
+      // const taggedChangeWotsAddress = new Uint8Array([...sourceTag!, ...changeWotsAddress!.slice(20, 40)]);
 
 
-      const destWotsAddress = WotsAddress.addrFromWots(destWallet.address!.slice(0, 2144));
+      // const destWotsAddress = WotsAddress.addrFromWots(destWallet.address!.slice(0, 2144));
 
       //balance of the source wallet
 
-
-
-
-
-
-
       // Test data
       const testParams = {
-        sourceTag: "0x" + Buffer.from(sourceTag!).toString('hex'),
-        sourceAddress: "0x" + Buffer.from(taggedSourceWotsAddress).toString('hex'),
-        destinationTag: "0x" + Buffer.from(destTag!).toString('hex'),
+        sourceTag: "0x" + Buffer.from(sourceWotsWallet.getAddrTag()!).toString('hex'),
+        sourceAddress: "0x" + Buffer.from(sourceWotsWallet.getAddress()!).toString('hex'),
+        destinationTag: "0x" + Buffer.from(destWallet.getAddrTag()!).toString('hex'),
         amount: BigInt(10000),
         fee: BigInt(500),
-        // Full WOTS public key (2144 bytes)
-        publicKey: Buffer.from(sourceWotsWallet.address!.slice(0)).toString('hex'),
+        // Full WOTS public key (2208 bytes)
+        publicKey: Buffer.from(sourceWotsWallet.getWots()!.slice(0)).toString('hex'),
         // 20-byte address (40 characters + "0x")
-        changePk: "0x" + Buffer.from(changeWotsAddress!.slice(20, 40)).toString('hex'),
+        changePk: "0x" + Buffer.from(changeWotsWallet.getAddrHash()!).toString('hex'),
         memo: 'AB-00-EF',
         blockToLive: 0,
         sourceBalance: BigInt(179999501),
       };
+
+
+      // console.log("Params", testParams)
 
       logger.info('Starting transaction build with params', testParams);
 
@@ -104,8 +105,8 @@ describe('TransactionBuilder Integration', () => {
       });
 
       try {
-        const pub = sourceWotsWallet.getAddress()!.slice(2144, 2144+32)
-        const rnd = sourceWotsWallet.getAddress()!.slice(2144+32, 2144+32+32)
+        const pub = sourceWotsWallet.getWots()!.slice(2144, 2144+32)
+        const rnd = sourceWotsWallet.getWots()!.slice(2144+32, 2144+32+32)
 
         const resolveTag = await builder.construction.resolveTag(testParams.sourceTag)
         expect(resolveTag.result.address).toBe(testParams.sourceAddress)
@@ -114,13 +115,13 @@ describe('TransactionBuilder Integration', () => {
         console.log("signed transactino length", signedTransaction.length)
         console.log("pub length", pub.length)
         console.log("rnd length", rnd.length, Buffer.from(rnd).toString('hex'))
-        const components = WOTSWallet.componentsGenerator(Buffer.from(sourceWotsSeed, 'hex'))
+
 
         const untaggedrnd = new Uint8Array([...rnd.slice(0, 32-12), ...new Uint8Array(Buffer.from("420000000e00000001000000", 'hex'))]);
         
         //combine with signature
         const combinedSig = new Uint8Array([...signedTransaction, ...pub.slice(0, 32), ...untaggedrnd])
-        const sig = builder.createSignature(testParams.publicKey, unsignedTransaction, combinedSig);
+        const sig = builder.createSignature(sourceWotsWallet.getAddress()!, unsignedTransaction, combinedSig);
 
         const combined = await builder.construction.combine(unsignedTransaction, [sig]);
         logger.debug('Combined Result', combined);
