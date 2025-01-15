@@ -1,5 +1,5 @@
 import { fail } from 'assert';
-import { MochimoConstruction } from '../api';
+import { MochimoApiClient } from '../api';
 import { describe, expect, it, beforeAll } from '@jest/globals';
 import { logger } from '../utils/logger';
 import CryptoJS from 'crypto-js';
@@ -10,7 +10,7 @@ import { PreprocessOptions } from '../types';
 const apiURL = process.env.API_URL || 'http://46.250.241.212:8081';
 
 describe('MochimoConstruction Integration', () => {
-    let construction: MochimoConstruction;
+    let construction: MochimoApiClient;
     let firstWotsWallet: WOTSWallet;
     let sourceWallet: WOTSWallet;
     let changeWallet: WOTSWallet;
@@ -18,7 +18,7 @@ describe('MochimoConstruction Integration', () => {
 
     beforeAll(() => {
         logger.enableDebug();
-        construction = new MochimoConstruction(apiURL);
+        construction = new MochimoApiClient(apiURL);
 
         // Create parent wallet
         const firstWotsSeed = CryptoJS.SHA256('mysourceseeddds' + 2).toString();

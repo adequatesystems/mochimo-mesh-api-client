@@ -1,4 +1,4 @@
-import { MochimoConstruction } from './api';
+import { MochimoApiClient } from './api';
 import { MCM_CURRENCY, NETWORK_IDENTIFIER } from './types';
 import { logger } from './utils/logger';
 import { WOTSWallet, MochimoHasher } from 'mochimo-wots';
@@ -18,10 +18,10 @@ export interface TransactionParams {
 }
 
 export class TransactionBuilder {
-  public construction: MochimoConstruction;
+  public construction: MochimoApiClient;
 
   constructor(baseUrl: string) {
-    this.construction = new MochimoConstruction(baseUrl);
+    this.construction = new MochimoApiClient(baseUrl);
     logger.debug('TransactionBuilder initialized', { baseUrl });
   }
 
@@ -128,7 +128,7 @@ export class TransactionBuilder {
         }
       ];
       logger.debug('Created operations', operations);
-      console.log('sending blk to live :: ', params.blockToLive)
+
       const preprocessResponse = await this.construction.preprocess(operations, {
         block_to_live: params.blockToLive,
         change_pk: params.changePk,

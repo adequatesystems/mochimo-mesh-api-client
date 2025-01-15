@@ -9,7 +9,7 @@ interface RosettaError {
 
 
 
-export class MochimoConstruction {
+export class MochimoApiClient {
   public baseUrl: string;
   private networkIdentifier: NetworkIdentifier;
 
