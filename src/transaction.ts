@@ -1,6 +1,21 @@
 import { MochimoConstruction } from './construction';
 import { MCM_CURRENCY, NETWORK_IDENTIFIER } from './types';
 import { logger } from './utils/logger';
+import { WOTSWallet, MochimoHasher } from 'mochimo-wots';
+import CryptoJS from 'crypto-js';
+
+export interface TransactionParams {
+  sourceTag: string;
+  sourceAddress: string;
+  destinationTag: string;
+  amount: bigint;
+  fee: bigint;
+  publicKey: string;
+  changePk: string;
+  memo?: string;
+  blockToLive: number;
+  sourceBalance: bigint;
+}
 
 export class TransactionBuilder {
   public construction: MochimoConstruction;
@@ -198,5 +213,92 @@ export class TransactionBuilder {
    */
   async getMempoolTransaction(transactionHash: string) {
     return this.construction.getMempoolTransaction(transactionHash);
+  }
+
+  public async buildAndSignTransaction(
+    sourceWallet: WOTSWallet,
+    changeWallet: WOTSWallet,
+    destinationTag: string,
+    amount: bigint,
+    fee: bigint,
+    memo?: string,
+    blockToLive: number = 0
+  ) {
+    const params: TransactionParams = {
+      sourceTag: "0x" + Buffer.from(sourceWallet.getAddrTag()!).toString('hex'),
+      sourceAddress: "0x" + Buffer.from(sourceWallet.getAddress()!).toString('hex'),
+      destinationTag: destinationTag,
+      amount,
+      fee,
+      publicKey: Buffer.from(sourceWallet.getWots()!.slice(0)).toString('hex'),
+      changePk: "0x" + Buffer.from(changeWallet.getAddrHash()!).toString('hex'),
+      memo,
+      blockToLive,
+      sourceBalance: amount + fee, // This should be fetched from network in production
+    };
+
+    // Build the transaction
+    const buildResult = await this.buildTransaction(params);
+    
+    // Sign the transaction
+    const unsignedTransaction = buildResult.unsigned_transaction;
+    const signedTransaction = sourceWallet.sign(
+      MochimoHasher.hash(new Uint8Array(Buffer.from(unsignedTransaction, 'hex')))
+    );
+
+    // Get pub and rnd from wallet
+    const pub = sourceWallet.getWots()!.slice(2144, 2144 + 32);
+    const rnd = sourceWallet.getWots()!.slice(2144 + 32, 2144 + 32 + 32);
+    
+    // Create untagged rnd
+    const untaggedrnd = new Uint8Array([
+      ...rnd.slice(0, 32-12), 
+      ...new Uint8Array(Buffer.from("420000000e00000001000000", 'hex'))
+    ]);
+    
+    // Combine signature components
+    const combinedSig = new Uint8Array([
+      ...signedTransaction, 
+      ...pub, 
+      ...rnd
+    ]);
+
+    // Create and combine signature
+    const sig = this.createSignature(
+      sourceWallet.getAddress()!,
+      unsignedTransaction,
+      combinedSig
+    );
+
+    const combined = await this.construction.combine(unsignedTransaction, [sig]);
+
+    // Submit the transaction
+    const submitResult = await this.submitSignedTransaction(combined.signed_transaction);
+
+    return {
+      buildResult,
+      submitResult,
+      signedTransaction: combined.signed_transaction
+    };
+  }
+
+  // used for testing;  gives out two wots wallet instances from a seed and index
+  public static createWallets(seed: string, index: number, parentWallet?: WOTSWallet) {
+    const sourceWotsSeed = CryptoJS.SHA256(seed + index).toString();
+    const changeWotsSeed = CryptoJS.SHA256(seed + (index + 1)).toString();
+
+    const sourceWallet = WOTSWallet.create(
+      'source',
+      Buffer.from(sourceWotsSeed, 'hex'),
+      parentWallet?.getAddrHash()!
+    );
+
+    const changeWallet = WOTSWallet.create(
+      'change',
+      Buffer.from(changeWotsSeed, 'hex'),
+      parentWallet?.getAddrHash()!
+    );
+
+    return { sourceWallet, changeWallet };
   }
 } 
