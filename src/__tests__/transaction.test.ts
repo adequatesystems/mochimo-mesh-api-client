@@ -24,7 +24,7 @@ describe('TransactionBuilder Integration', () => {
       // Create source and change wallets
       const { sourceWallet, changeWallet } = TransactionBuilder.createWallets(
         'mysourceseeddds',
-        7,
+        9,
         firstWotsWallet
       );
 

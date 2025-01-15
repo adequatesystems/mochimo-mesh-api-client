@@ -117,3 +117,7 @@ export interface PayloadsResponse {
   unsigned_transaction: string;
   payloads: SigningPayload[];
 }
+export interface TransactionSubmitResponse {
+  transaction_identifier: { hash: string };
+}
+

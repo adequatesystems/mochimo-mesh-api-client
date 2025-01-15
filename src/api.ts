@@ -1,4 +1,4 @@
-import { NetworkIdentifier, MCM_CURRENCY, NETWORK_IDENTIFIER, Operation, PublicKey, ResolveTagResponse, TransactionIdentifier, MempoolResponse, MempoolTransactionResponse, BalanceResponse, PreprocessResponse, MetadataResponse, PreprocessOptions, PayloadsResponse } from './types';
+import { NetworkIdentifier, MCM_CURRENCY, NETWORK_IDENTIFIER, Operation, PublicKey, ResolveTagResponse, TransactionIdentifier, MempoolResponse, MempoolTransactionResponse, BalanceResponse, PreprocessResponse, MetadataResponse, PreprocessOptions, PayloadsResponse, TransactionSubmitResponse } from './types';
 import { logger } from './utils/logger';
 
 interface RosettaError {
@@ -126,7 +126,7 @@ export class MochimoApiClient {
     });
   }
 
-  async submit(signedTransaction: string) {
+  async submit(signedTransaction: string): Promise<TransactionSubmitResponse> {
     logger.debug('Submitting transaction', { signedTransaction });
     return this.makeRequest('/construction/submit', {
       network_identifier: this.networkIdentifier,
