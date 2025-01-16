@@ -24,9 +24,10 @@ describe('TransactionBuilder Integration', () => {
       // Create source and change wallets
       const { sourceWallet, changeWallet } = TransactionBuilder.createWallets(
         'mysourceseeddds',
-        9,
+        12,
         firstWotsWallet
       );
+      console.log("SOURCE TAG:: ", firstWotsWallet.getAddrTag());
 
       // Create destination wallet
       const destWotsSeed = CryptoJS.SHA256('mydestseeddds').toString();
@@ -43,6 +44,7 @@ describe('TransactionBuilder Integration', () => {
         sourceWallet,
         changeWallet,
         "0x" + Buffer.from(destWallet.getAddrTag()!).toString('hex'),
+        // "0x"+"65f4fc7f96456dbbdeabf514cd5a32318a2edf59",
         BigInt(10000),
         BigInt(500),
         'AB-00-EF'

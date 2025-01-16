@@ -40,7 +40,7 @@ export interface Operation {
   account: AccountIdentifier;
   amount: Amount;
   metadata?: Record<string, any>;
-} 
+}
 export type ResolveTagResponse = {
   result: {
     address: string;
@@ -121,3 +121,39 @@ export interface TransactionSubmitResponse {
   transaction_identifier: { hash: string };
 }
 
+export interface BlockIdentifier {
+  index?: number;
+  hash?: string;
+}
+export interface Operation {
+  operation_identifier: {
+    index: number;
+  };
+  type: string;
+  status: string;
+  account: AccountIdentifier;
+  amount: {
+    value: string;  // Changed from number to string
+    currency: {
+      symbol: string;
+      decimals: number;
+    };
+  };
+}
+
+export interface Transaction {
+  transaction_identifier: TransactionIdentifier;
+  operations: Operation[];
+}
+
+export interface Block {
+  block_identifier: BlockIdentifier;
+  parent_block_identifier: BlockIdentifier;
+  timestamp: number;
+  transactions: Transaction[];
+}
+export interface NetworkStatus {
+  current_block_identifier: BlockIdentifier;
+  genesis_block_identifier: BlockIdentifier;
+  current_block_timestamp: number;
+}
