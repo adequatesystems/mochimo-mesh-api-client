@@ -99,7 +99,7 @@ export class TransactionBuilder {
           operation_identifier: { index: 0 },
           type: "SOURCE_TRANSFER",
           status: "SUCCESS",
-          account: { address: params.sourceAddress },
+          account: { address: params.sourceTag },
           amount: {
             value: (-params.amount).toString(),
             currency: MCM_CURRENCY
@@ -130,25 +130,22 @@ export class TransactionBuilder {
       logger.debug('Created operations', operations);
 
       const preprocessResponse = await this.construction.preprocess(operations, {
-        block_to_live: params.blockToLive,
+        block_to_live: params.blockToLive.toString(),
         change_pk: params.changePk,
         change_addr: params.changePk,
-        source_balance: params.sourceBalance ? Number(params.sourceBalance) : 179999501
+        source_balance: params.sourceBalance ? (params.sourceBalance.toString()) : '179999501'
       });
       logger.debug('Preprocess response', preprocessResponse);
-      // this.construction.baseUrl = 'http://35.208.202.76:8080'
       const metadataResponse = await this.construction.metadata(
         preprocessResponse.options,
         [{ hex_bytes: params.publicKey, curve_type: 'wotsp' }]
       );
       logger.debug('Metadata response', metadataResponse);
-      // this.construction.baseUrl = 'http://localhost:8081'
       const results = await this.construction.payloads(
         operations,
         metadataResponse.metadata,
         [{ hex_bytes: params.publicKey, curve_type: 'wotsp' }]
       );
-      // this.construction.baseUrl = 'http://46.250.241.212:8081'
       return results;
 
     } catch (error) {
@@ -158,7 +155,6 @@ export class TransactionBuilder {
   }
 
   async submitSignedTransaction(signedTransaction: string) {
-    // this.construction.baseUrl = 'http://46.250.241.212:8081'
     return await this.construction.submit(signedTransaction);
   }
 
@@ -230,7 +226,7 @@ export class TransactionBuilder {
       destinationTag: destinationTag,
       amount,
       fee,
-      publicKey: Buffer.from(sourceWallet.getWots()!.slice(0)).toString('hex'),
+      publicKey: Buffer.from(sourceWallet.getWots()!.slice(0, 2144)).toString('hex'),
       changePk: "0x" + Buffer.from(changeWallet.getAddrHash()!).toString('hex'),
       memo,
       blockToLive,
@@ -239,7 +235,7 @@ export class TransactionBuilder {
 
     // Build the transaction
     const buildResult = await this.buildTransaction(params);
-    
+
     // Sign the transaction
     const unsignedTransaction = buildResult.unsigned_transaction;
     const signedTransaction = sourceWallet.sign(
@@ -249,11 +245,11 @@ export class TransactionBuilder {
     // Get pub and rnd from wallet
     const pub = sourceWallet.getWots()!.slice(2144, 2144 + 32);
     const rnd = sourceWallet.getWots()!.slice(2144 + 32, 2144 + 32 + 32);
-    
+
     // Combine signature components
     const combinedSig = new Uint8Array([
-      ...signedTransaction, 
-      ...pub, 
+      ...signedTransaction,
+      ...pub,
       ...rnd
     ]);
 

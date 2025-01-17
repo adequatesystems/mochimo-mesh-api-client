@@ -5,7 +5,7 @@ import { logger } from '../utils/logger';
 import CryptoJS from 'crypto-js';
 import { WOTSWallet } from 'mochimo-wots';
 
-const apiURL = process.env.API_URL || 'http://46.250.241.212:8081'
+const apiURL = process.env.API_URL || 'http://35.208.202.76:8080'
 
 describe('TransactionBuilder Integration', () => {
   let builder: TransactionBuilder;
